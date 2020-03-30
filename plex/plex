@@ -1,0 +1,7 @@
+# file: /etc/ufw/applications.d/plex
+# Used to configure the ufw definition for Plex Media Server
+
+[plex]
+title=Plex Media Server
+description=Your favorite movies, TV, music, web shows, podcasts, and more, all streamed to your favorite screens.
+ports=32400,3005,5353,8234,32469/tcp|1900,32410,32412,32413,32414/udp

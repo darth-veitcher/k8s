@@ -1,0 +1,7 @@
+# file: /etc/ufw/applications.d/k3s
+# Used to configure the ufw definition for Lightweight Kubernetes (k3s)
+
+[k3s]
+title=Lightweight Kubernetes (k3s)
+description=K3s is a highly available, certified Kubernetes distribution designed for production workloads in unattended, resource-constrained, remote locations or inside IoT appliances.
+ports=443,6443/tcp|8472/udp
