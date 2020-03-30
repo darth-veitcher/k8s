@@ -1,0 +1,44 @@
+# Secret used to hold the cloudflare API token
+# * Permissions:
+#   * Zone - DNS - Edit
+#   * Zone - Zone - Read
+# * Zone Resources:
+#   * Include - All Zones *(just selecting the domain in question will result in an error later on)*
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudflare-api-token-secret
+  namespace: cert-manager
+type: Opaque
+stringData:
+  api-token: superSecretAPILeyFromClouflare
+---
+# Cluster Issuer which uses the DNS challenge for a set domain and falls back to HTTP
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+  namespace: default
+spec:
+  acme:
+    # The ACME server URL and email address for ACME registration
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: myrealemailfromcloudflareaccount@gmail.com
+    # Name of the secret to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt-key
+    solvers:
+    # Enable DNS01 validation for zone
+    - dns01:
+        cloudflare:
+          email: myrealemailfromcloudflareaccount@gmail.com
+          apiTokenSecretRef:
+            name: cloudflare-api-token-secret
+            key: api-token
+      selector:
+        dnsZones:
+        - 'domain.com'
+    # Enable HTTP01 validations as fallback
+    - http01:
+       ingress:
+        class: nginx
