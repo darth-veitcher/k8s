@@ -30,3 +30,5 @@ helm install nfs-server \
   stable/nfs-server-provisioner \
   --set persistence.enabled=true,persistence.storageClass=local-path,persistence.size=200Gi
 ```
+
+A good reference: [How To Set Up ReadWriteMany (RWX) Persistent Volumes with NFS on DigitalOcean Kubernetes](https://www.digitalocean.com/community/tutorials/how-to-set-up-readwritemany-rwx-persistent-volumes-with-nfs-on-digitalocean-kubernetes)
