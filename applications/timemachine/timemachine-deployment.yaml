@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timemachine-config
+  namespace: backups
+  labels:
+    app: timemachine
+data:
+  TM_ID: "1000"
+  TM_SIZE: "512000"
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: timemachine-data-pv-claim
+#   namespace: backups
+#   labels:
+#     app: timemachine
+# spec:
+#   accessModes:
+#   - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 512Gi
+#   storageClassName: nfs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timemachine
+  namespace: backups
+  labels:
+    app: timemachine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: timemachine
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: timemachine
+    spec:
+      hostNetwork: true
+      securityContext:
+        # runAsUser: 1000
+        # runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: timemachine
+        image: willtho/samba-timemachine
+        env:
+          - name: TM_USER
+            valueFrom:
+              secretKeyRef:
+                name: timemachine-user-creds
+                key: TM_USER
+          - name: TM_PW
+            valueFrom:
+              secretKeyRef:
+                name: timemachine-user-creds
+                key: TM_PW
+        envFrom:
+        - configMapRef:
+            name: timemachine-config
+        ports:
+        # https://wiki.archlinux.org/index.php/Avahi
+        - containerPort: 5353
+          name: avahi
+        # https://www.samba.org/~tpot/articles/firewall.html
+        - containerPort: 137
+          name: udp-137
+        - containerPort: 138
+          name: udp-138
+        - containerPort: 139
+          name: tcp-139
+        - containerPort: 445
+          name: tcp-445
+        volumeMounts:
+        - name: timemachine-data
+          mountPath: /timemachine
+      volumes:
+      - name: timemachine-data
+        # https://kubernetes.io/docs/concepts/storage/volumes/#hostpath
+        hostPath:
+          path: /mnt/local/media/timemachine
+          type: DirectoryOrCreate
