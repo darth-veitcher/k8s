@@ -1,53 +1,22 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: timemachine-udp
+  name: timemachine
   namespace: backups
-  annotations:
-    metallb.universe.tf/allow-shared-ip: timemachine-svc
   labels:
     app: timemachine
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
   ports:
-    - name: avahi
-      port: 5353
-      protocol: UDP
-      targetPort: avahi
-    - name: udp-137
-      port: 137
-      protocol: UDP
-      targetPort: udp-137
-    - name: udp-138
-      port: 138
-      protocol: UDP
-      targetPort: udp-138
-  selector:
-    app: timemachine
-  sessionAffinity: None
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: timemachine-tcp
-  namespace: backups
-  annotations:
-    metallb.universe.tf/allow-shared-ip: timemachine-svc
-  labels:
-    app: timemachine
-spec:
-  type: LoadBalancer
-  externalTrafficPolicy: Local
-  ports:
-    - name: tcp-139
-      port: 139
+    - name: afp
+      port: 548
       protocol: TCP
-      targetPort: tcp-139
-    - name: tcp-445
-      port: 445
+      targetPort: afp
+    - name: ldaps
+      port: 636
       protocol: TCP
-      targetPort: tcp-445
+      targetPort: ldaps
   selector:
     app: timemachine
   sessionAffinity: None
