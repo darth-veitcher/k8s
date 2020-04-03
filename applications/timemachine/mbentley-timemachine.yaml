@@ -6,23 +6,36 @@ metadata:
   labels:
     app: timemachine
 data:
-  TM_ID: "1000"
-  TM_SIZE: "512000"
-# ---
-# apiVersion: v1
-# kind: PersistentVolumeClaim
-# metadata:
-#   name: timemachine-data-pv-claim
-#   namespace: backups
-#   labels:
-#     app: timemachine
-# spec:
-#   accessModes:
-#   - ReadWriteOnce
-#   resources:
-#     requests:
-#       storage: 512Gi
-#   storageClassName: nfs
+  CUSTOM_SMB_CONF: "false"
+  CUSTOM_USER: "false"
+  DEBUG_LEVEL: "1"
+  MIMIC_MODEL: "TimeCapsule8,119"
+  EXTERNAL_CONF: ""
+  HIDE_SHARES: "no"
+  # TM_USERNAME: "timemachine"
+  TM_GROUPNAME: "timemachine"
+  TM_UID: "1000"
+  TM_GID: "1000"
+  # PASSWORD: "timemachine"
+  SET_PERMISSIONS: "false"
+  SHARE_NAME: "TimeMachine"
+  VOLUME_SIZE_LIMIT: "0"
+  WORKGROUP: "WORKGROUP"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: timemachine-data
+  namespace: backups
+  labels:
+    app: timemachine
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512Gi
+  storageClassName: nfs
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -50,14 +63,14 @@ spec:
         # fsGroup: 1000
       containers:
       - name: timemachine
-        image: willtho/samba-timemachine
+        image: mbentley/timemachine:smb
         env:
-          - name: TM_USER
+          - name: TM_USERNAME
             valueFrom:
               secretKeyRef:
                 name: timemachine-user-creds
                 key: TM_USER
-          - name: TM_PW
+          - name: PASSWORD
             valueFrom:
               secretKeyRef:
                 name: timemachine-user-creds
@@ -80,10 +93,12 @@ spec:
           name: tcp-445
         volumeMounts:
         - name: timemachine-data
-          mountPath: /timemachine
+          mountPath: /opt/timemachine
       volumes:
       - name: timemachine-data
         # https://kubernetes.io/docs/concepts/storage/volumes/#hostpath
-        hostPath:
-          path: /mnt/local/media/timemachine
-          type: DirectoryOrCreate
+        # hostPath:
+        #   path: /mnt/local/media/timemachine
+        #   type: DirectoryOrCreate
+        persistentVolumeClaim:
+          claimName: timemachine-data

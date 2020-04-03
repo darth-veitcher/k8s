@@ -104,7 +104,7 @@ spec:
               - key: topology.kubernetes.io/region
                 operator: In
                 values:
-                - house
+                - home
           # If possible run on the dedicated dns box
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 1
