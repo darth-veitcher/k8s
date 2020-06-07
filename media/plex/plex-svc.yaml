@@ -6,7 +6,7 @@ metadata:
   annotations:
     metallb.universe.tf/allow-shared-ip: plex-svc
   labels:
-    app: enternal-dns
+    app: plex
 spec:
   type: LoadBalancer
   loadBalancerIP: 192.168.0.123

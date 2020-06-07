@@ -104,5 +104,6 @@ ENV/
 site/
 drawio-exporter
 
-# Notes
+# Notes and local
 notes/
+*.local
