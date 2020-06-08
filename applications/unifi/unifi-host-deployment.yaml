@@ -1,0 +1,96 @@
+# As the UniFi controller needs to run on the host network
+# line 24 adds `hostNetwork: true`. We therefore don't need a
+# service definition.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unifi
+  namespace: home
+  labels:
+    app: unifi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unifi
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: unifi
+      namespace: home
+    spec:
+      hostNetwork: true
+      containers:
+        - name: unifi
+          image: linuxserver/unifi-controller
+          ports:
+          - containerPort: 3478
+            name: udp-3478
+            protocol: UDP
+          - containerPort: 10001
+            name: udp-10001
+            protocol: UDP
+          - containerPort: 8080
+            name: tcp-8080
+            protocol: TCP
+          - containerPort: 8443
+            name: tcp-8443
+            protocol: TCP
+          # OPTIONAL PORTS
+          - containerPort: 1900
+            name: udp-1900
+            protocol: UDP
+          - containerPort: 8843
+            name: tcp-8843
+            protocol: TCP
+          - containerPort: 8880
+            name: tcp-8880
+            protocol: TCP
+          - containerPort: 6789
+            name: tcp-6789
+            protocol: TCP
+          - containerPort: 5514
+            name: tcp-5514
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /config
+            name: config
+          startupProbe:
+            tcpSocket:
+              port: tcp-8443
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: tcp-8443
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: tcp-8443
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 2
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 4096Mi
+            requests:
+              cpu: 100m
+              memory: 1024Mi
+          securityContext: {}
+      terminationGracePeriodSeconds: 30
+      # https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+      dnsPolicy: ClusterFirst
+      dnsConfig:
+        nameservers:
+          - 127.0.0.1
+          - 1.1.1.1
+      volumes:
+      - name: config
+        # https://kubernetes.io/docs/concepts/storage/volumes/#hostpath
+        hostPath:
+          path: /mnt/local/storage/kubernetes/unifi
+          type: DirectoryOrCreate
