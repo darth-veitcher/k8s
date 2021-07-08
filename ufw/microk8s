@@ -1,0 +1,30 @@
+# file: /etc/ufw/applications.d/microk8s
+# Used to configure the ufw definition for MicroK8s
+# https://microk8s.io/docs/services-and-ports
+
+# This definition targets the default host interface
+# - port: 16443
+# 	comment: API server
+# - port: 25000
+# 	comment: cluster-agent
+# - port: 19001
+# 	comment: dqlite
+[MicroK8s]
+title=MicroK8s
+description=Low-ops, minimal production Kubernetes
+ports=16443,25000,19001/tcp
+
+# This definition targets the localhost interface
+# Services binding to the localhost interface
+# - port: 10250
+# 	comment: kubelet
+# - port: 12379
+# 	comment: etcd
+# - port: 10257
+# 	comment: kube-controller
+# - port: 10259
+# 	comment: kube-scheduler
+[MicroK8s-internal]
+title=MicroK8s (internal)
+description=Services bound to localhost for MicroK8s
+ports=10250,12379,10257,10259/tcp
